@@ -93,6 +93,13 @@ int dBok = 0;
 int PPMok = 0;
 int period = 3000;
 int radius = 147;
+int time_gps = 0;
+int time_aht = 2000;
+int time_globo = 4000;
+int time_vento = 6000;
+int time_co2 = 8000;
+int time_luz = 10000;
+int time_db = 12000;
 //--------------------------------------------------------------------------------------------------------------------------------------
 // Calibração simples
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -442,7 +449,7 @@ void setup()
     // Imprime cabeçalho na planilha .CSV cada vez que inicia
     //--------------------------------------------------------------------------------------------------------------------------------------
 
- appendFile(SD, "/mochila.csv", "Dia;Mes;Ano;Hora;Minuto;Segundo;Latitude
+appendFile(SD, "/mochila.csv", "Dia;Mes;Ano;Hora;Minuto;Segundo;Latitude
 (graus);Longitude (graus);Velocidade (km/h);Satelites (n);Temperatura do ar (C);Umidade do ar
 (%);Temperatura de globo (C);Velocidade do vento (m/s);Concentracao de CO2 (ppm);Iluminancia
 (lux);Ruido Ambiente (db)\n");
@@ -613,144 +620,153 @@ void salva_SD()
 //--------------------------------------------------------------------------------------------------------------------------------------
 void printa_gps()
 {
-    boolean newData = false;
+    boolean newData = false; // Declaração de uma variável booleana para verificar se há novos dados
     for (unsigned long start = millis(); millis() - start < 1000;)
-    {
+    { // Loop que executa por 1 segundo
         while (neogps.available())
-        {
+        { // Enquanto houver dados disponíveis no GPS
             if (gps.encode(neogps.read()))
-            {
-                newData = true;
+            {                   // Se os dados puderem ser codificados pelo objeto 'gps'
+                newData = true; // Define newData como true, indicando que novos dados foram recebidos
             }
         }
     }
-    // If newData is true
+    // Se newData for true
     if (newData == true)
     {
-        newData = false;
-        Serial.println(gps.satellites.value());
-        print_speed();
+        newData = false;                        // Redefine newData para false
+        Serial.println(gps.satellites.value()); // Imprime o número de satélites conectados no serial monitor
+        print_speed();                          // Chama a função print_speed() (presumivelmente para imprimir a velocidade)
     }
 
+    // Se newData for false
     if (newData == false)
     {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Atualizando GPS");
-        delay(500); //Teste
+        lcd.clear();                  // Limpa a tela LCD
+        lcd.setCursor(0, 0);          // Define o cursor para a posição inicial (linha 0, coluna 0)
+        lcd.print("Atualizando GPS"); // Imprime a mensagem "Atualizando GPS" na tela LCD
+        delay(250);                   // Pausa por 250 milissegundos
     }
 }
+
 //--------------------------------------------------------------------------------------------------------------------------------------
 // Programação do sensor de temperatura e umidade do ar (AHT10 / ASAIR®)
 //--------------------------------------------------------------------------------------------------------------------------------------
 void printa_aht()
 {
-    sensors_event_t humidity, temp;
-    aht.getEvent(&humidity, &temp);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Medindo");
-    lcd.setCursor(0, 1);
-    lcd.print("Temp. e Umid.");
-    delay(30750);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Temp: ");
-    lcd.setCursor(6, 0);
-    lcd.print(temp.temperature * calibratemp);
+    sensors_event_t humidity, temp; // Declaração de variáveis para armazenar os eventos de temperatura e umidade
+    aht.getEvent(&humidity, &temp); // Obtém os dados do sensor e os armazena nas variáveis 'humidity' e 'temp'
+    if (millis() > time_aht)
+    {
+        lcd.clear();                               // Limpa a tela do LCD
+        lcd.setCursor(0, 0);                       // Define o cursor para a posição inicial (linha 0, coluna 0)
+        lcd.print("Medindo");                      // Exibe a mensagem "Medindo" na primeira linha do LCD
+        lcd.setCursor(0, 1);                       // Define o cursor para a segunda linha do LCD
+        lcd.print("Temp. e Umid.");                // Exibe a mensagem "Temp. e Umid." na segunda linha do LCD
+        delay(30750);                              // Aguarda 30.75 segundos
+        lcd.clear();                               // Limpa a tela do LCD
+        lcd.setCursor(0, 0);                       // Define o cursor para a posição inicial (linha 0, coluna 0)
+        lcd.print("Temp: ");                       // Exibe "Temp: " na primeira linha do LCD
+        lcd.setCursor(6, 0);                       // Move o cursor para a posição onde a temperatura será exibida
+        lcd.print(temp.temperature * calibratemp); // Exibe a temperatura ajustada pelo fator de calibração 'calibratemp'
 
-    lcd.setCursor(12, 0);
-    lcd.print("C");
-    lcd.setCursor(0, 1);
-    lcd.print("Umid: ");
-    lcd.setCursor(6, 1);
-    lcd.print(humidity.relative_humidity * calibraumid);
+        lcd.setCursor(12, 0);                                // Move o cursor para a posição onde será exibida a unidade de temperatura
+        lcd.print("C");                                      // Exibe a unidade "C" (Celsius)
+        lcd.setCursor(0, 1);                                 // Define o cursor para a posição inicial da segunda linha
+        lcd.print("Umid: ");                                 // Exibe "Umid: " na segunda linha do LCD
+        lcd.setCursor(6, 1);                                 // Move o cursor para a posição onde a umidade será exibida
+        lcd.print(humidity.relative_humidity * calibraumid); // Exibe a umidade ajustada pelo fator de calibração 'calibraumid'
 
-    lcd.setCursor(12, 1);
-    lcd.print("%");
-    delay(500);
+        lcd.setCursor(12, 1); // Move o cursor para a posição onde será exibida a unidade de umidade
+        lcd.print("%");       // Exibe a unidade "%" (percentual)
+        time_aht = millis() + 14000;
+    }
 }
-//--------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
 // Programação do sensor de temperatura de globo (DS18B20 / Maxim Integrated Products®)
 //--------------------------------------------------------------------------------------------------------------------------------------
-void printa_globo()
-{
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Medindo");
-    lcd.setCursor(0, 1);
-    lcd.print("Temp. de globo");
-    delay(1100);
-
-    sensors.requestTemperatures();
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Temp. de globo:");
-    lcd.setCursor(0, 1);
-    lcd.print(sensors.getTempCByIndex(0) * calibraglobo);
-    lcd.setCursor(6, 1);
-    lcd.print("C");
-    delay(500); //Teste
+void printa_globo(){
+    if (millis() > time_globo){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Medindo");
+        lcd.setCursor(0, 1);
+        lcd.print("Temp. de globo");
+        delay(1100);
+    
+        sensors.requestTemperatures();
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Temp. de globo:");
+        lcd.setCursor(0, 1);
+        lcd.print(sensors.getTempCByIndex(0) * calibraglobo);
+        lcd.setCursor(6, 1);
+        lcd.print("C");
+        time_globo = millis() + 14000;
+    }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
 // Programação do sensor de lux (BH1750-FVI GY-30 / ROHM Semicondutor®)
 //--------------------------------------------------------------------------------------------------------------------------------------
-void printa_luz()
-{
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Medindo");
-    lcd.setCursor(0, 1);
-    lcd.print("Iluminancia");
-    delay(1000);
-
-    potValue1 = analogRead(potPin1);
-    potValue1ok = ((potValue1 * 2000) / 4095) - 1000;
-    uint16_t lux = LightSensor.GetLightIntensity();
-    luxok = (lux);
-
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Iluminancia: ");
-    lcd.setCursor(0, 1);
-    lcd.print(luxok);
-    lcd.setCursor(6, 1);
-    lcd.print("lux");
-    delay(500); //Teste
+void printa_luz(){
+    if (millis() > time_luz){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Medindo");
+        lcd.setCursor(0, 1);
+        lcd.print("Iluminancia");
+        delay(1000);
+    
+        potValue1 = analogRead(potPin1);
+        potValue1ok = ((potValue1 * 2000) / 4095) - 1000;
+        uint16_t lux = LightSensor.GetLightIntensity();
+        luxok = (lux);
+    
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Iluminancia: ");
+        lcd.setCursor(0, 1);
+        lcd.print(luxok);
+        lcd.setCursor(6, 1);
+        lcd.print("lux");
+        time_luz = millis() + luz;
+    }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
 // Programação do sensor de ruído (KY-038 / JOY-IT®)
 //--------------------------------------------------------------------------------------------------------------------------------------
-void printa_db()
-{
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Medindo");
-    lcd.setCursor(0, 1);
-    lcd.print("Ruido Ambiente");
-    delay(1000);
+void printa_db(){
+    if (millis() > time_db){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Medindo");
+        lcd.setCursor(0, 1);
+        lcd.print("Ruido Ambiente");
+        delay(1000);
 
-    potValue2 = analogRead(potPin2);
-    potValue2ok = ((potValue2 * 100) / 4095) - 50;
-    PdB = dB;
-    adc = analogRead(MIC);
-    dB = (adc + 83.2073) / 11.003;
+        potValue2 = analogRead(potPin2);
+        potValue2ok = ((potValue2 * 100) / 4095) - 50;
+        PdB = dB;
+        adc = analogRead(MIC);
+        dB = (adc + 83.2073) / 11.003;
 
-    dBok = (dB);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Ruido Ambiente: ");
-    lcd.setCursor(0, 1);
-    lcd.print(dBok);
-    lcd.setCursor(4, 1);
-    lcd.print("dB");
-    delay(500); //Teste
+        dBok = (dB);
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Ruido Ambiente: ");
+        lcd.setCursor(0, 1);
+        lcd.print(dBok);
+        lcd.setCursor(4, 1);
+        lcd.print("dB");
+        time_db = millis() + 14000;
+    }
+    
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
 // Programação do sensor de concentração de CO2 (MQ-135 / Winsen®)
 //--------------------------------------------------------------------------------------------------------------------------------------
-void printa_co2()
-{
+void printa_co2(){
+    
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Medindo");
@@ -774,36 +790,37 @@ void printa_co2()
     co2raw = zzz / 10;
     co2ppm = co2raw - co2Zero;
 
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("CO2 ambiente: ");
-    lcd.setCursor(0, 1);
-    lcd.print(co2ppm);
-    lcd.setCursor(6, 1);
-    lcd.print("ppm");
-    delay(500); //Teste
+    if (millis() > time_co2){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("CO2 ambiente: ");
+        lcd.setCursor(0, 1);
+        lcd.print(co2ppm);
+        lcd.setCursor(6, 1);
+        lcd.print("ppm"); 
+    }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
 // Programação do sensor de ventilação (Anemômetro AN-1 / WRF COMERCIAL®)
 //--------------------------------------------------------------------------------------------------------------------------------------
-void printa_vento()
-{
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Medindo");
-    lcd.setCursor(0, 1);
-    lcd.print("Vel. do vento");
-    delay(500); //500
-    windvelocity();
-    vmd = vm / 20;
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Vel. do vento: ");
-    lcd.setCursor(0, 1);
-    lcd.print(windspeed * calibravento);
-    lcd.setCursor(6, 1);
-    lcd.print("m/s");
-    delay(500); //500
+void printa_vento(){
+    if (millis() > time_vento){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Medindo");
+        lcd.setCursor(0, 1);
+        lcd.print("Vel. do vento");
+        delay(500); // 500
+        windvelocity();
+        vmd = vm / 20;
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Vel. do vento: ");
+        lcd.setCursor(0, 1);
+        lcd.print(windspeed * calibravento);
+        lcd.setCursor(6, 1);
+        lcd.print("m/s");
+    } 
 }
 // 4000-3100
 // Delay mínimo de 3,1 segundos, adotado 4s para cada leitura para fim de arredondamento
@@ -826,7 +843,7 @@ void print_speed()
         lcd.print("Lng: ");
         lcd.setCursor(5, 1);
         lcd.print(gps.location.lng(), 6);
-        delay(500); //Teste
+        delay(500); // Teste
         lcd.clear();
 
         lcd.setCursor(0, 0);
@@ -840,7 +857,7 @@ void print_speed()
         lcd.print("Sat Conect: ");
         lcd.setCursor(12, 1);
         lcd.print(gps.satellites.value(), 1);
-        delay(500); //Teste
+        delay(500); // Teste
         lcd.clear();
     }
     if (gps.location.isValid() == 0)
@@ -853,12 +870,15 @@ void print_speed()
 //--------------------------------------------------------------------------------------------------------------------------------------
 // Função adicional do sensor de ventilação
 //--------------------------------------------------------------------------------------------------------------------------------------
-void windvelocity(){
-    for (int i = 0; i < 2; i++){
+void windvelocity()
+{
+    for (int i = 0; i < 2; i++)
+    {
         Serial.print(" Leitura: ");
         Serial.println(i);
 
-        if (millis() - startTime >= period){
+        if (millis() - startTime >= period)
+        {
 
             detachInterrupt(intPin); // Desabilita interrupcao
             Serial.print("Pulsos :");
