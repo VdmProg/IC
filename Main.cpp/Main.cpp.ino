@@ -645,7 +645,7 @@ void printa_gps()
         lcd.clear();                  // Limpa a tela LCD
         lcd.setCursor(0, 0);          // Define o cursor para a posição inicial (linha 0, coluna 0)
         lcd.print("Atualizando GPS"); // Imprime a mensagem "Atualizando GPS" na tela LCD
-        delay(1000);                   // Pausa por 1000 milissegundos
+        delay(1000);                  // Pausa por 1000 milissegundos
     }
 }
 
@@ -658,29 +658,30 @@ void printa_aht()
     aht.getEvent(&humidity, &temp); // Obtém os dados do sensor e os armazena nas variáveis 'humidity' e 'temp'
     if (millis() > time_aht)
     {
-        lcd.clear();                               // Limpa a tela do LCD
-        lcd.setCursor(0, 0);                       // Define o cursor para a posição inicial (linha 0, coluna 0)
-        lcd.print("Medindo");                      // Exibe a mensagem "Medindo" na primeira linha do LCD
-        lcd.setCursor(0, 1);                       // Define o cursor para a segunda linha do LCD
-        lcd.print("Temp. e Umid.");                // Exibe a mensagem "Temp. e Umid." na segunda linha do LCD
-        delay(2000);                               // Aguarda 30.75 segundos
-        lcd.clear();                               // Limpa a tela do LCD
-        lcd.setCursor(0, 0);                       // Define o cursor para a posição inicial (linha 0, coluna 0)
-        lcd.print("Temp: ");                       // Exibe "Temp: " na primeira linha do LCD
-        lcd.setCursor(6, 0);                       // Move o cursor para a posição onde a temperatura será exibida
-        lcd.print(temp.temperature * calibratemp); // Exibe a temperatura ajustada pelo fator de calibração 'calibratemp'
+        lcd.clear();                // Limpa a tela do LCD
+        lcd.setCursor(0, 0);        // Define o cursor para a posição inicial (linha 0, coluna 0)
+        lcd.print("Medindo");       // Exibe a mensagem "Medindo" na primeira linha do LCD
+        lcd.setCursor(0, 1);        // Define o cursor para a segunda linha do LCD
+        lcd.print("Temp. e Umid."); // Exibe a mensagem "Temp. e Umid." na segunda linha do LCD
+        if (millis() >= time_aht + 2000)
+        {
+            lcd.clear();                               // Limpa a tela do LCD
+            lcd.setCursor(0, 0);                       // Define o cursor para a posição inicial (linha 0, coluna 0)
+            lcd.print("Temp: ");                       // Exibe "Temp: " na primeira linha do LCD
+            lcd.setCursor(6, 0);                       // Move o cursor para a posição onde a temperatura será exibida
+            lcd.print(temp.temperature * calibratemp); // Exibe a temperatura ajustada pelo fator de calibração 'calibratemp'
 
-        lcd.setCursor(12, 0);                                // Move o cursor para a posição onde será exibida a unidade de temperatura
-        lcd.print("C");                                      // Exibe a unidade "C" (Celsius)
-        lcd.setCursor(0, 1);                                 // Define o cursor para a posição inicial da segunda linha
-        lcd.print("Umid: ");                                 // Exibe "Umid: " na segunda linha do LCD
-        lcd.setCursor(6, 1);                                 // Move o cursor para a posição onde a umidade será exibida
-        lcd.print(humidity.relative_humidity * calibraumid); // Exibe a umidade ajustada pelo fator de calibração 'calibraumid'
+            lcd.setCursor(12, 0);                                // Move o cursor para a posição onde será exibida a unidade de temperatura
+            lcd.print("C");                                      // Exibe a unidade "C" (Celsius)
+            lcd.setCursor(0, 1);                                 // Define o cursor para a posição inicial da segunda linha
+            lcd.print("Umid: ");                                 // Exibe "Umid: " na segunda linha do LCD
+            lcd.setCursor(6, 1);                                 // Move o cursor para a posição onde a umidade será exibida
+            lcd.print(humidity.relative_humidity * calibraumid); // Exibe a umidade ajustada pelo fator de calibração 'calibraumid'
 
-        lcd.setCursor(12, 1); // Move o cursor para a posição onde será exibida a unidade de umidade
-        lcd.print("%");       // Exibe a unidade "%" (percentual)
-        delay(1000);
-        time_aht = millis() + extra;
+            lcd.setCursor(12, 1); // Move o cursor para a posição onde será exibida a unidade de umidade
+            lcd.print("%");       // Exibe a unidade "%" (percentual)
+            time_aht = millis() + extra;
+        }
     }
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -698,15 +699,17 @@ void printa_globo()
         delay(2000);
 
         sensors.requestTemperatures();
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Temp. de globo:");
-        lcd.setCursor(0, 1);
-        lcd.print(sensors.getTempCByIndex(0) * calibraglobo);
-        lcd.setCursor(6, 1);
-        lcd.print("C");
-        delay(1000);
-        time_globo = millis() + extra;
+        if (millis() >= time_globo + 2000)
+        {
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Temp. de globo:");
+            lcd.setCursor(0, 1);
+            lcd.print(sensors.getTempCByIndex(0) * calibraglobo);
+            lcd.setCursor(6, 1);
+            lcd.print("C");
+            time_globo = millis() + extra;
+        }
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -714,7 +717,7 @@ void printa_globo()
 //--------------------------------------------------------------------------------------------------------------------------------------
 void printa_luz()
 {
-    if (millis() > time_luz)
+    if (millis() >= time_luz)
     {
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -727,16 +730,17 @@ void printa_luz()
         potValue1ok = ((potValue1 * 2000) / 4095) - 1000;
         uint16_t lux = LightSensor.GetLightIntensity();
         luxok = (lux);
-
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Iluminancia: ");
-        lcd.setCursor(0, 1);
-        lcd.print(luxok);
-        lcd.setCursor(6, 1);
-        lcd.print("lux");
-        delay(1000);
-        time_luz = millis() + extra;
+        if (millis() >= time_luz + 2000)
+        {
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Iluminancia: ");
+            lcd.setCursor(0, 1);
+            lcd.print(luxok);
+            lcd.setCursor(6, 1);
+            lcd.print("lux");
+            time_luz = millis() + extra;
+        }
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -744,14 +748,13 @@ void printa_luz()
 //--------------------------------------------------------------------------------------------------------------------------------------
 void printa_db()
 {
-    if (millis() > time_db)
+    if (millis() >= time_db)
     {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Medindo");
         lcd.setCursor(0, 1);
         lcd.print("Ruido Ambiente");
-        delay(2000);
 
         potValue2 = analogRead(potPin2);
         potValue2ok = ((potValue2 * 100) / 4095) - 50;
@@ -759,16 +762,18 @@ void printa_db()
         adc = analogRead(MIC);
         dB = (adc + 83.2073) / 11.003;
 
-        dBok = (dB);
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Ruido Ambiente: ");
-        lcd.setCursor(0, 1);
-        lcd.print(dBok);
-        lcd.setCursor(4, 1);
-        lcd.print("dB");
-        time_db = millis() + extra;
-        delay(2000);
+        if (millis() >= time_db + 2000)
+        {
+            dBok = (dB);
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Ruido Ambiente: ");
+            lcd.setCursor(0, 1);
+            lcd.print(dBok);
+            lcd.setCursor(4, 1);
+            lcd.print("dB");
+            time_db = millis() + extra;
+        }
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -801,15 +806,17 @@ void printa_co2()
         co2raw = zzz / 10;
         co2ppm = co2raw - co2Zero;
 
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("CO2 ambiente: ");
-        lcd.setCursor(0, 1);
-        lcd.print(co2ppm);
-        lcd.setCursor(6, 1);
-        lcd.print("ppm");
-        delay(1000);
-        time_co2 = millis() + extra;
+        if (millis() >= time_co2 + 2000)
+        {
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("CO2 ambiente: ");
+            lcd.setCursor(0, 1);
+            lcd.print(co2ppm);
+            lcd.setCursor(6, 1);
+            lcd.print("ppm");
+            time_co2 = millis() + extra;
+        }
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -827,15 +834,17 @@ void printa_vento()
         delay(2000); // Teste
         windvelocity();
         vmd = vm / 20;
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Vel. do vento: ");
-        lcd.setCursor(0, 1);
-        lcd.print(windspeed * calibravento);
-        lcd.setCursor(6, 1);
-        lcd.print("m/s");
-        time_vento = millis() + extra;
-        delay(2000);
+        if (millis() >= time_vento + 2000)
+        {
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Vel. do vento: ");
+            lcd.setCursor(0, 1);
+            lcd.print(windspeed * calibravento);
+            lcd.setCursor(6, 1);
+            lcd.print("m/s");
+            time_vento = millis() + extra;
+        }
     }
 }
 // 4000-3100
