@@ -100,6 +100,7 @@ int time_vento = 6000;
 int time_co2 = 8000;
 int time_luz = 10000;
 int time_db = 12000;
+int extra = 28000;
 //--------------------------------------------------------------------------------------------------------------------------------------
 // Calibração simples
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -663,7 +664,7 @@ void printa_aht()
         lcd.print("Medindo");                      // Exibe a mensagem "Medindo" na primeira linha do LCD
         lcd.setCursor(0, 1);                       // Define o cursor para a segunda linha do LCD
         lcd.print("Temp. e Umid.");                // Exibe a mensagem "Temp. e Umid." na segunda linha do LCD
-        delay(30750);                              // Aguarda 30.75 segundos
+        delay(3000);                              // Aguarda 30.75 segundos
         lcd.clear();                               // Limpa a tela do LCD
         lcd.setCursor(0, 0);                       // Define o cursor para a posição inicial (linha 0, coluna 0)
         lcd.print("Temp: ");                       // Exibe "Temp: " na primeira linha do LCD
@@ -679,7 +680,7 @@ void printa_aht()
 
         lcd.setCursor(12, 1); // Move o cursor para a posição onde será exibida a unidade de umidade
         lcd.print("%");       // Exibe a unidade "%" (percentual)
-        time_aht = millis() + 14000;
+        time_aht = millis() + extra;
     }
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -702,7 +703,7 @@ void printa_globo(){
         lcd.print(sensors.getTempCByIndex(0) * calibraglobo);
         lcd.setCursor(6, 1);
         lcd.print("C");
-        time_globo = millis() + 14000;
+        time_globo = millis() + extra;
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -729,7 +730,7 @@ void printa_luz(){
         lcd.print(luxok);
         lcd.setCursor(6, 1);
         lcd.print("lux");
-        time_luz = millis() + luz;
+        time_luz = millis() + extra;
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -758,7 +759,7 @@ void printa_db(){
         lcd.print(dBok);
         lcd.setCursor(4, 1);
         lcd.print("dB");
-        time_db = millis() + 14000;
+        time_db = millis() + extra;
     }
     
 }
@@ -798,6 +799,7 @@ void printa_co2(){
         lcd.print(co2ppm);
         lcd.setCursor(6, 1);
         lcd.print("ppm"); 
+        time_co2 = millis() + extra;
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -820,6 +822,7 @@ void printa_vento(){
         lcd.print(windspeed * calibravento);
         lcd.setCursor(6, 1);
         lcd.print("m/s");
+        time_vento = millis() + extra;
     } 
 }
 // 4000-3100
@@ -843,7 +846,7 @@ void print_speed()
         lcd.print("Lng: ");
         lcd.setCursor(5, 1);
         lcd.print(gps.location.lng(), 6);
-        delay(500); // Teste
+        delay(1000); // Teste
         lcd.clear();
 
         lcd.setCursor(0, 0);
@@ -857,7 +860,7 @@ void print_speed()
         lcd.print("Sat Conect: ");
         lcd.setCursor(12, 1);
         lcd.print(gps.satellites.value(), 1);
-        delay(500); // Teste
+        delay(1000); // Teste
         lcd.clear();
     }
     if (gps.location.isValid() == 0)
