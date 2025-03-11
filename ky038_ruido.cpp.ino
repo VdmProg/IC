@@ -1,17 +1,20 @@
-// Arduino and KY-038 module
-void setup ()
-{
-  Serial.begin(9600); // initialize serial
-}
-void loop ()
-{
-  // display analog and digital values to serial
+#define potPin2 12
+#define MIC 34
 
-  int saida = analogRead(A0);
-  Serial.print("\nAnalog pin: ");
-  if(saida > 100){
-    Serial.print(saida);
-    Serial.println("SOM MUITO ALTO");
-  }
-  Serial.print(saida);
+int saidaRuido = 0;
+int saidaRuido_ajust;
+int PdB, dB;
+int adc;
+int dBok = 0;
+
+void ruido()
+{
+  // saidaRuido = analogRead(potPin2);
+  // saidaRuido_ajust = ((saidaRuido * 100) / 4095) - 50;
+
+  PdB = dB;
+  adc = analogRead(MIC);
+  dB = (adc + 83.2073) / 11.003;
+
+  dBok = (dB);
 }
