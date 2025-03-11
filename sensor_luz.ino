@@ -14,8 +14,8 @@ void Setup()
 
 void luz()
 {
-    saidaLuz = analogRead(potPin1);
-    saidaLuz_ajust = ((saidaLuz * 2000) / 4095) - 1000;
+    // saidaLuz = analogRead(potPin1);
+    // saidaLuz_ajust = ((saidaLuz * 2000) / 4095) - 1000;
     uint16_t lux = LightSensor.GetLightIntensity();
     luxok = (lux);
 }
