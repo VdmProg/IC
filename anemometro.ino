@@ -12,7 +12,11 @@ float vmd = 0;               // Variável não utilizada no código atual.
 float vmax = 0;              // Velocidade máxima do vento registrada.
 unsigned long startTime = 0; // Tempo inicial para medir o período.
 
-// Função principal para calcular a velocidade do vento.
+void loop(){
+    windspeed();
+    print(windspeed);
+}
+
 void windvelocity()
 {
     if (millis() - startTime >= period)
