@@ -1,21 +1,15 @@
-#define potPin1 14
+#include <BH1750.h>
 
-int saidaLuz = 0;
-int saidaLuz_ajust = 0;
-int luxok = 0;
+BH1750 lightMeter;                   //Obejto para o sensor de Luz
 
-volatile uint8_t counter;
-BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
+uint16_t lux = 0;
 
 void Setup()
 {
-    LightSensor.begin();
+   //Inicializa o BH1750(Iluminância)
+  lightMeter.begin();
 }
 
-void luz()
-{
-    // saidaLuz = analogRead(potPin1);
-    // saidaLuz_ajust = ((saidaLuz * 2000) / 4095) - 1000;
-    uint16_t lux = LightSensor.GetLightIntensity();
-    luxok = (lux);
-}
+void QueHajaLuz() {
+    lux = lightMeter.readLightLevel();
+  }
