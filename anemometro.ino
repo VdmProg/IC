@@ -12,9 +12,13 @@ float vmd = 0;               // Variável não utilizada no código atual.
 float vmax = 0;              // Velocidade máxima do vento registrada.
 unsigned long startTime = 0; // Tempo inicial para medir o período.
 
+void Setup(){
+    Serial.begin(9600);
+}
+
 void loop(){
     windspeed();
-    print(windspeed);
+    Serial.print(windspeed);
 }
 
 void windvelocity()
