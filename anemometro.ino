@@ -18,7 +18,7 @@ void Setup(){
 
 void loop(){
     windspeed();
-    Serial.print(windspeed);
+    Serial.println(windspeed);
 }
 
 void windvelocity()
