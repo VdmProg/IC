@@ -1,50 +1,45 @@
-const int intPin = 27; // Pino digital conectado ao sensor de vento para interrupção.
+#define RAIO_METROS 0.105f
+#define CIRCUNFERENCIA(raio) 2.0*raio*PI
+#define PIN 27
 
-const float pi = 3.14159265; // Valor de Pi usado nos cálculos.
-int radius = 147;            // Raio em milímetros do sensor de vento (anemômetro).
-int period = 3000;           // Período em milissegundos para calcular a velocidade do vento.
+int periodo = 0;
+int sinal = 0;
+int sinalAnterior = 0;
+float tempoInicial = 0;
+float tempoFinal = 0;
 
-volatile uint8_t counter;    // Variável contadora usada em interrupções.
-float RPM = 0;               // Armazena rotações por minuto do anemômetro.
-float windspeed = 0;         // Velocidade atual do vento (m/s).
-float vm = 0;                // Velocidade média do vento.
-float vmd = 0;               // Variável não utilizada no código atual.
-float vmax = 0;              // Velocidade máxima do vento registrada.
-unsigned long startTime = 0; // Tempo inicial para medir o período.
-
-void Setup(){
-    Serial.begin(9600);
+//a região que o sensor funciona é de 72° 
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  pinMode(PIN, INPUT);
 }
 
-void loop(){
-    windspeed();
-    Serial.println(windspeed);
+void loop() {
+  velocidade();
 }
+s
+void velocidade(){
+  sinal = digitalRead(PIN);
+  short nMudancas = 0;
+  for (sinalAnterior = sinal; sinal == sinalAnterior;){
+    sinal = digitalRead(PIN);
+  }
+  tempoInicial = millis();
+  /*
+  O anemometro possui duas áreas em sua cirncunferência, uma de output 0
+  e outra de output 1, para contar quanto tempo demora para fazer toda a circunferência
+  é preciso antes 
+  */
+  for (sinalAnterior = sinal; nMudancas < 2;){
+    sinal = digitalRead(PIN);
+    sinal == sinalAnterior ? false : nMudancas++ ;
+  }
+  tempoFinal = millis();
 
-void windvelocity()
-{
-    if (millis() - startTime >= period)
-    {
-        detachInterrupt(intPin);                  // Desabilita interrupcao
-        RPM = ((counter) * 60) / (period / 1000); // Calculate revolutions per minute (RPM) 60
-        windspeed = 0;
-        counter = 0; // Zera cont pulsos
-        unsigned long millis();
-        startTime = millis();
+  float tempo = (tempoFinal - tempoInicial)/1000;
+  float velocidade = CIRCUNFERENCIA(RAIO_METROS) / tempo;
 
-        attachInterrupt(intPin, addcount, RISING); // Habilita interrupcao
-    }
-    // Calcula a velocidade do vento (m/s) com base no RPM, raio e tempo.
-    windspeed = (((4 * pi * radius * RPM) / 60) / 3600);
-    vm = vm + windspeed;  // Soma a velocidade atual à velocidade média acumulada.
-    if (windspeed > vmax) // Verifica se a velocidade atual é a maior já registrada.
-    {
-        vmax = windspeed; // Atualiza a velocidade máxima.
-    }
-}
-
-// Função chamada pela interrupção para incrementar o contador.
-void addcount()
-{
-    counter++; // Incrementa o contador a cada pulso detectado.
+  Serial.print("Velocidade:");
+  Serial.println(velocidade);
 }
