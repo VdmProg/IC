@@ -2,12 +2,6 @@
 #define CIRCUNFERENCIA(raio) 2.0*raio*PI
 #define PIN 27
 
-int periodo = 0;
-int sinal = 0;
-int sinalAnterior = 0;
-float tempoInicial = 0;
-float tempoFinal = 0;
-
 //a região que o sensor funciona é de 72° 
 void setup() {
   // put your setup code here, to run once:
@@ -18,11 +12,17 @@ void setup() {
 void loop() {
   velocidade();
 }
-s
+
 void velocidade(){
-  sinal = digitalRead(PIN);
-  short nMudancas = 0;
-  for (sinalAnterior = sinal; sinal == sinalAnterior;){
+  int sinal = digitalRead(PIN);
+  int sinalAnterior = sinal;
+  float tempoInicial = 0;
+  float tempoFinal = 0;
+
+  /*
+  Primeira calibração para saber onde começa a circunferência
+  */
+  while (sinal == sinalAnterior){
     sinal = digitalRead(PIN);
   }
   tempoInicial = millis();
@@ -31,9 +31,9 @@ void velocidade(){
   e outra de output 1, para contar quanto tempo demora para fazer toda a circunferência
   é preciso antes 
   */
-  for (sinalAnterior = sinal; nMudancas < 2;){
+  for (short nMudancas = 0, sinalAnterior = sinal; nMudancas < 2;){
     sinal = digitalRead(PIN);
-    sinal == sinalAnterior ? false : nMudancas++ ;
+    sinal != sinalAnterior ? ++nMudancas : false;
   }
   tempoFinal = millis();
 
